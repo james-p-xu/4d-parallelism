@@ -32,3 +32,20 @@ This is a baseline where all computations for a batch happen sequentially on a s
 
 *   **Concept:** Process data items or perform model operations serially on one device
 *   **Simulation:** [`0d_single_gpu.py`](./0d_single_gpu.py) uses a single `GPU` instance to process items one by one, showing the total compute time without any parallelism
+
+### 1D) Data Parallelism (DP)
+
+This is perhaps the most common strategy for scaling training. The core idea is to replicate the entire model on multiple devices (ranks). Each device processes a different slice (mini-batch) of the global data batch concurrently.
+
+*   **Concept:** Replicate model, split data batch, synchronize gradients
+*   **Workflow:**
+    1.  Each rank computes the forward pass on its local mini-batch
+    2.  Each rank computes the backward pass, generating local gradients
+    3.  Gradients are synchronized and averaged across all ranks. A common efficient algorithm for this is **Ring All-Reduce**
+    4.  Each rank updates its local model copy using the synchronized gradients
+*   **Pros:** Easy to implement using PyTorch's DDP. Scales well if computation time significantly outweighs communication time
+*   **Cons:** Memory intensive (each rank holds the full model, gradients, and optimizer states). Communication overhead for gradient synchronization can become a bottleneck, especially with many devices or slow networks
+*   **Simulation:** [`1d_data_parallel.py`](./1d_data_parallel.py) simulates this using multiple processes (ranks). Each rank processes a data chunk in parallel. A separate step simulates the time cost of gradient synchronization using Ring All-Reduce
+*   **Resources:**
+    1. Getting Started with Distributed Data Parallel [PyTorch Docs](https://pytorch.org/tutorials/intermediate/ddp_tutorial.html)
+    2. Bringing HPC Techniques to Deep Learning (Baidu's All-Reduce) [blog](https://andrew.gibiansky.com/blog/machine-learning/baidu-allreduce/)
