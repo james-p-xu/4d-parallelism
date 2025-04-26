@@ -1,11 +1,12 @@
 import time
 
 from gpu import GPU
+from simulation_config import NUM_DATA_ITEMS, TOTAL_COMPUTE_PER_ITEM
 
 
 def simulate_work_on_gpu(gpu: GPU, item):
     """Simulates computation for a data item on a specific GPU."""
-    compute_units = 5  # Some arbitrary amount of work
+    compute_units = TOTAL_COMPUTE_PER_ITEM
     task_description = f"Process item {item}"
 
     gpu.compute(task_description, compute_units)
@@ -20,7 +21,7 @@ def simulate_work_on_gpu(gpu: GPU, item):
 
 def main():
     gpu0 = GPU(rank=0)
-    num_items = 8
+    num_items = NUM_DATA_ITEMS
 
     print(f"Starting sequential processing (0D - Single GPU) on {num_items} items...")
     start_time = time.time()
